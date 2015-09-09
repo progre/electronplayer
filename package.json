@@ -1,7 +1,7 @@
 {
-  "name": "electronplayer",
+  "name": "Sphere Live Stream Player",
   "version": "0.0.0",
-  "description": "FLV player",
+  "description": "Media player for sphere live stream",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -40,6 +40,10 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
-    "source-map-support": "^0.3.2"
+    "bluebird": "^2.10.0",
+    "fluent-ffmpeg": "^2.0.1",
+    "node-uuid": "^1.4.3",
+    "source-map-support": "^0.3.2",
+    "test-tcp": "0.0.4"
   }
 }

@@ -3,7 +3,7 @@ let gulp = require('gulp');
 let del = require('del');
 let runSequence = require('run-sequence');
 
-require('./gulp/copy')({ src: ['src/**/*.*(js|json|png|mkv)', '!tsconfig.json'] });
+require('./gulp/copy')();
 require('./gulp/jade')();
 require('./gulp/stylus')();
 require('./gulp/test')();
