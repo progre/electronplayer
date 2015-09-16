@@ -36,7 +36,7 @@ files.forEach(file => {
 
 let mainWindow: any = null;
 let server = new MKVServer(cacheDir);
-let url = 'http://169.254.141.181:7144/stream/da198b4e8802b0bb7121b3ab63756093.flv'; // TODO: 引数から取る
+let url = argv()[0];
 // TODO: プリフェッチしてもいいかも
 
 Promise.all([
@@ -48,4 +48,11 @@ Promise.all([
     mainWindow.loadUrl(`file://${__dirname}/public/index.html?port=${port}&url=${encodeURIComponent(url) }`);
 });
 
-console.log(process.argv);
+function argv() {
+    let originalArgv = process.argv;
+    console.log(originalArgv[0]);
+    if (originalArgv[0].endsWith('electron.exe')) {
+        return originalArgv.splice(2);
+    }
+    return originalArgv.splice(1);
+}

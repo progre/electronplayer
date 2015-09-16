@@ -17,19 +17,29 @@
 /// <reference path="../../../typings/DefinitelyTyped/gl-matrix/gl-matrix.d.ts" />
 'use strict';
 import {main} from './gl/index';
+import {attach} from './controller';
+import Title from './title';
 
-let map = new Map<string, string>();
-location.search
-    .split(/[?&]/)
-    .map(x => x.split('='))
-    .forEach(x => map.set(x[0], x[1]));
+class Main {
+    private title = new Title(document);
 
-console.log('start req: ' + `http://127.0.0.1:${map.get('port') }/${map.get('url') }.mkv`);
-loadVideo(`http://127.0.0.1:${map.get('port') }/${map.get('url') }.mkv`).then(video => {
-    let canvas = <HTMLCanvasElement>document.getElementById('canvas');
-    expandCanvas(canvas);
-    main(canvas, video);
-});
+    constructor() {
+        let map = new Map<string, string>();
+        location.search
+            .split(/[?&]/)
+            .map(x => x.split('='))
+            .forEach(x => map.set(x[0], x[1]));
+
+        let canvas = <HTMLCanvasElement>document.getElementById('canvas');
+        expandCanvas(canvas);
+        loadVideo(`http://127.0.0.1:${map.get('port') }/${map.get('url') }.mkv`).then(video => {
+            attach(canvas, video, this.title);
+            main(canvas, video);
+        });
+    }
+}
+
+(<any>window).main = new Main();
 
 function loadImage(src: string) {
     return new Promise<HTMLImageElement>((resolve, reject) => {

@@ -105,7 +105,6 @@ function readRecursive(
     loader: Loader,
     listener: (buffer: Buffer) => void): Promise<void> {
     return bluebird.promisify(fs.read)(fd, buffer, 0, buffer.length, null)
-    // return read(fd, buffer, 0, buffer.length, null)
         .then((obj: any[]) => {
             let bytesRead = obj[0];
             let buf = obj[1];
@@ -120,22 +119,4 @@ function readRecursive(
             }
             return readRecursive(fd, buf, loader, listener);
         });
-}
-
-function read(
-    fd: number,
-    buffer: Buffer,
-    offset: number,
-    length: number,
-    position: number
-    ) {
-    return new Promise<{ bytesRead: number, buffer: Buffer }>((resolve, reject) => {
-        fs.read(fd, buffer, offset, length, position, (err, bytesRead, buf) => {
-            if (err != null) {
-                reject(err);
-                return;
-            }
-            resolve({ bytesRead, buffer: buf });
-        });
-    });
 }
