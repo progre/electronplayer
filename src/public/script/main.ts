@@ -19,6 +19,7 @@
 import {main} from './gl/index';
 import {attach} from './controller';
 import Title from './title';
+import Models from './models';
 
 class Main {
     private title = new Title(document);
@@ -30,12 +31,15 @@ class Main {
             .map(x => x.split('='))
             .forEach(x => map.set(x[0], x[1]));
 
+        let models = new Models();
         let canvas = <HTMLCanvasElement>document.getElementById('canvas');
-        expandCanvas(canvas);
-        loadVideo(`http://127.0.0.1:${map.get('port') }/${map.get('url') }.mkv`).then(video => {
-            attach(canvas, video, this.title);
-            main(canvas, video);
-        });
+        initWindow(canvas);
+        let video = <HTMLVideoElement>document.createElement('video');
+        attach(canvas, video, this.title, models);
+        loadVideo(video, `http://127.0.0.1:${map.get('port') }/${map.get('url') }.mkv`)
+            .then(() => {
+                main(canvas, video, models);
+            });
     }
 }
 
@@ -51,13 +55,12 @@ function loadImage(src: string) {
     });
 }
 
-function loadVideo(src: string) {
-    return new Promise<HTMLVideoElement>((resolve, reject) => {
-        let video = <HTMLVideoElement>document.createElement('video');
+function loadVideo(video: HTMLVideoElement, src: string) {
+    return new Promise<void>((resolve, reject) => {
         (<any>window).video = video;
         video.addEventListener('play', function() {
             video.removeEventListener('play', this);
-            resolve(video);
+            resolve();
         });
         video.addEventListener('ended', () => {
             alert('ended');
@@ -66,32 +69,39 @@ function loadVideo(src: string) {
             alert(err);
         });
         video.addEventListener('abord', (event: Event) => console.log('abord', event));
-        video.addEventListener('canplay', (event: Event) => console.log('canplay', event));
-        video.addEventListener('canplaythrough', (event: Event) => console.log('canplaythrough', event));
-        video.addEventListener('durationchange', (event: Event) => console.log('durationchange', event));
+        // video.addEventListener('canplay', (event: Event) => console.log('canplay', event));
+        // video.addEventListener('canplaythrough', (event: Event) => console.log('canplaythrough', event));
+        // video.addEventListener('durationchange', (event: Event) => console.log('durationchange', event));
         video.addEventListener('emptied', (event: Event) => console.log('emptied', event));
         video.addEventListener('error', (event: Event) => console.log('error', event));
         video.addEventListener('emptied', (event: Event) => console.log('emptied', event));
         video.addEventListener('ended', (event: Event) => console.log('ended', event));
-        video.addEventListener('loadedmetadata', (event: Event) => console.log('loadedmetadata', event));
-        video.addEventListener('loadeddata', (event: Event) => console.log('loadeddata', event));
-        video.addEventListener('loadstart', (event: Event) => console.log('loadstart', event));
+        // video.addEventListener('loadedmetadata', (event: Event) => console.log('loadedmetadata', event));
+        // video.addEventListener('loadeddata', (event: Event) => console.log('loadeddata', event));
+        // video.addEventListener('loadstart', (event: Event) => console.log('loadstart', event));
         video.addEventListener('pause', (event: Event) => console.log('pause', event));
-        video.addEventListener('play', (event: Event) => console.log('play', event));
-        video.addEventListener('playing', (event: Event) => console.log('playing', event));
+        // video.addEventListener('play', (event: Event) => console.log('play', event));
+        // video.addEventListener('playing', (event: Event) => console.log('playing', event));
         // video.addEventListener('progress', (event: Event) => console.log('progress', event)); // ネットワークからのデータ入力
         video.addEventListener('ratechange', (event: Event) => console.log('ratechange', event));
         video.addEventListener('seeked', (event: Event) => console.log('seeked', event));
         video.addEventListener('seeking', (event: Event) => console.log('seeking', event));
-        video.addEventListener('suspend', (event: Event) => console.log('suspend', event));
+        // video.addEventListener('suspend', (event: Event) => console.log('suspend', event));
         // video.addEventListener('timeupdate', (event: Event) => console.log('timeupdate', event)); // 再生位置更新
-        video.addEventListener('volumechange', (event: Event) => console.log('volumechange', event));
+        // video.addEventListener('volumechange', (event: Event) => console.log('volumechange', event));
         video.addEventListener('waiting', (event: Event) => console.log('waiting', event));
 
         video.addEventListener('stalled', (event: Event) => console.log('stalled', event));
         video.autoplay = true;
         video.src = src;
     });
+}
+
+function initWindow(canvas: HTMLCanvasElement) {
+    window.addEventListener('resize', ev => {
+        expandCanvas(canvas);
+    });
+    expandCanvas(canvas);
 }
 
 function expandCanvas(canvas: HTMLCanvasElement) {
