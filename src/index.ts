@@ -18,12 +18,14 @@
 require('source-map-support').install();
 require('crash-reporter').start();
 import * as fs from 'fs';
+import * as log4js from 'log4js';
 import Loader from './server/loader';
 import MKVServer from './server/mkvserver';
 let app = require('app');
 let BrowserWindow = require('browser-window');
+let logger = log4js.getLogger();
 
-Loader.setFfmpegPath(__dirname + '/ffmpeg/ffmpeg.exe');
+setFfmpegPath()
 
 let cacheDir = app.getPath('userData') + '/StreamCache';
 if (!fs.existsSync(cacheDir)) {
@@ -39,19 +41,37 @@ let server = new MKVServer(cacheDir);
 let url = argv()[0];
 // TODO: プリフェッチしてもいいかも
 
-Promise.all([
-    server.listen(),
-    new Promise((resolve, reject) => app.on('ready', resolve))
-]).then(results => {
-    let port = results[0];
-    mainWindow = new BrowserWindow({ width: 800, height: 600 });
-    mainWindow.loadUrl(`file://${__dirname}/public/index.html?port=${port}&url=${encodeURIComponent(url) }`);
-});
+Promise.all(
+    [
+        server.listen(),
+        new Promise((resolve, reject) => app.on('ready', resolve))
+    ])
+    .then(results => {
+        let port = results[0];
+        mainWindow = new BrowserWindow({ width: 800, height: 600 });
+        mainWindow.loadUrl(`file://${__dirname}/public/index.html?port=${port}&url=${encodeURIComponent(url) }`);
+    })
+    .catch((err: any) => {
+        logger.fatal(err.stack);
+    });
+
+function setFfmpegPath() {
+    switch (process.platform) {
+        case 'win32':
+            Loader.setFfmpegPath(__dirname + '/ffmpeg/ffmpeg.exe');
+            break;
+        case 'darwin':
+            Loader.setFfmpegPath(__dirname + '/ffmpeg/ffmpeg.osx');
+            break;
+        default:
+            break;
+    }
+}
 
 function argv() {
     let originalArgv = process.argv;
     console.log(originalArgv[0]);
-    if (originalArgv[0].endsWith('electron.exe')) {
+    if (originalArgv[0].endsWith('electron.exe') || originalArgv[0].endsWith('Electron')) {
         return originalArgv.splice(2);
     }
     return originalArgv.splice(1);

@@ -19,7 +19,6 @@ export default class Loader {
     private runningCommand: FfmpegCommand;
 
     static setFfmpegPath(ffmpegPath: string) {
-        console.log(ffmpegPath);
         FfmpegCommand.setFfmpegPath(ffmpegPath);
     }
 
