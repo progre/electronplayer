@@ -19,43 +19,35 @@ require('source-map-support').install();
 require('crash-reporter').start();
 import * as fs from 'fs';
 import * as log4js from 'log4js';
+const promisify: (func: Function) => (...args: any[]) => Promise<any> = require('bluebird').promisify;
 import Loader from './server/loader';
 import MKVServer from './server/mkvserver';
-let app = require('app');
-let BrowserWindow = require('browser-window');
-let logger = log4js.getLogger();
-
-setFfmpegPath()
+const app = require('app');
+const BrowserWindow = require('browser-window');
+const logger = log4js.getLogger();
 
 let cacheDir = app.getPath('userData') + '/StreamCache';
-if (!fs.existsSync(cacheDir)) {
-    fs.mkdirSync(cacheDir);
-}
-let files = fs.readdirSync(cacheDir);
-files.forEach(file => {
-    fs.unlinkSync(cacheDir + '/' + file);
-});
-
 let mainWindow: any = null;
-let server = new MKVServer(cacheDir);
 let url = argv()[0];
-// TODO: プリフェッチしてもいいかも
 
+initFfmpeg();
 Promise.all(
     [
-        server.listen(),
+        initCacheDir(cacheDir)
+            .then(() => new MKVServer(cacheDir).listen()),
         new Promise((resolve, reject) => app.on('ready', resolve))
     ])
     .then(results => {
         let port = results[0];
         mainWindow = new BrowserWindow({ width: 800, height: 600 });
-        mainWindow.loadUrl(`file://${__dirname}/public/index.html?port=${port}&url=${encodeURIComponent(url) }`);
+        mainWindow.loadUrl(
+            `file://${__dirname}/public/index.html?port=${port}&url=${encodeURIComponent(url) }`);
     })
     .catch((err: any) => {
         logger.fatal(err.stack);
     });
 
-function setFfmpegPath() {
+function initFfmpeg() {
     switch (process.platform) {
         case 'win32':
             Loader.setFfmpegPath(__dirname + '/ffmpeg/ffmpeg.exe');
@@ -68,9 +60,22 @@ function setFfmpegPath() {
     }
 }
 
+function initCacheDir(cacheDir: string) {
+    return new Promise((resolve, reject) => fs.exists(cacheDir, resolve))
+        .then((exists: boolean) => {
+            if (!exists) {
+                return promisify(fs.mkdir)(cacheDir);
+            }
+        })
+        .then(() => promisify(fs.readdir)(cacheDir))
+        .then((files: string[]) => {
+            let unlink = promisify(fs.unlink);
+            return Promise.all(files.map(file => unlink(cacheDir + '/' + file)));
+        });
+}
+
 function argv() {
     let originalArgv = process.argv;
-    console.log(originalArgv[0]);
     if (originalArgv[0].endsWith('electron.exe') || originalArgv[0].endsWith('Electron')) {
         return originalArgv.splice(2);
     }
