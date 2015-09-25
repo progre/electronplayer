@@ -59,12 +59,14 @@ export function attach(
             prev = toXY(event);
         });
         element.addEventListener('mousemove', event => {
+            let x = (event.clientX - prev.x) / element.clientHeight * 4;
+            let y = (event.clientY - prev.y) / element.clientHeight * 4;
             if ((event.buttons & 0x01) > 0) {
-                models.addPitch((event.clientY - prev.y) / 175);
-                models.addYaw((event.clientX - prev.x) / 175);
+                models.addYaw(x);
+                models.addPitch(y);
             }
             if ((event.buttons & 0x02) > 0) {
-                models.addZoom((event.clientY - prev.y) / 175);
+                models.addZoom(y);
             }
             prev = toXY(event);
         });

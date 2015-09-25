@@ -22,7 +22,7 @@ export default class Models {
     public zoom = 1;
 
     addPitch(y: number) {
-        this.pitch += y - (this.zoom * y * 0.225);
+        this.pitch += y * (1 - this.zoom * 0.575);
         if (this.pitch < -HALF_PI) {
             this.pitch = -HALF_PI;
         } else if (HALF_PI < this.pitch) {
@@ -31,7 +31,7 @@ export default class Models {
     }
 
     addYaw(x: number) {
-        this.yaw += x - (this.zoom * x * 0.225);
+        this.yaw += x * (1 - this.zoom * 0.575);
         if (this.yaw < 0) {
             this.yaw += DOUBLE_PI;
         } else if (DOUBLE_PI < this.yaw) {
