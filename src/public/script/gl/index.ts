@@ -18,8 +18,7 @@ import * as shader from './shader';
 import {createModel, Model} from './model';
 import Models from '../models';
 
-export function main(canvas: HTMLCanvasElement, video: HTMLVideoElement, models: Models) {
-    let gl = glcommon.getGLContext(canvas);
+export function main(gl: WebGLRenderingContext, canvas: HTMLCanvasElement, video: HTMLVideoElement, pMatrix: GLM.IArray, models: Models) {
     let shaderProgram = shader.createShaderProgram(gl);
     let model = createModel(gl);
     let texture = createTexture(gl, video);
@@ -27,10 +26,7 @@ export function main(canvas: HTMLCanvasElement, video: HTMLVideoElement, models:
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
     gl.clearColor(0.02, 0.04, 0.1, 1.0);
     gl.cullFace(gl.BACK);
-    gl.viewport(0, 0, canvas.width, canvas.height);
 
-    let pMatrix = mat4.create(); // perspective matrix (投影)
-    mat4.perspective(pMatrix, 45, canvas.width / canvas.height, 0.1, 100.0);
     let mvMatrix = mat4.create(); // model view matrix
 
     let renderer = function() {
@@ -51,6 +47,11 @@ export function main(canvas: HTMLCanvasElement, video: HTMLVideoElement, models:
         draw(gl, model);
     };
     requestAnimationFrame(renderer);
+}
+
+export function initScreen(gl: WebGLRenderingContext, canvas: HTMLCanvasElement, pMatrix: GLM.IArray) {
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    mat4.perspective(pMatrix, 45, canvas.width / canvas.height, 0.1, 100.0);
 }
 
 function createTexture(gl: WebGLRenderingContext, image: HTMLImageElement|HTMLVideoElement) {

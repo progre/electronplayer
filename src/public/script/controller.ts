@@ -85,7 +85,7 @@ export function attach(
             return {
                 x: event.clientX,
                 y: event.clientY
-            }
+            };
         }
     }
 }

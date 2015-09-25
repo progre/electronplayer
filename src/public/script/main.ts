@@ -16,7 +16,8 @@
 /// <reference path="../../../node_modules/typescript/lib/lib.es6.d.ts" />
 /// <reference path="../../../typings/DefinitelyTyped/gl-matrix/gl-matrix.d.ts" />
 'use strict';
-import {main} from './gl/index';
+import {initScreen, main} from './gl/index';
+import {getGLContext} from './gl/glcommon';
 import {attach} from './controller';
 import Title from './title';
 import Models from './models';
@@ -25,25 +26,38 @@ class Main {
     private title = new Title(document);
 
     constructor() {
-        let map = new Map<string, string>();
-        location.search
-            .split(/[?&]/)
-            .map(x => x.split('='))
-            .forEach(x => map.set(x[0], x[1]));
-
-        let models = new Models();
         let canvas = <HTMLCanvasElement>document.getElementById('canvas');
-        initWindow(canvas);
+        let gl = getGLContext(canvas);
+        let pMatrix = mat4.create(); // perspective matrix (投影)
+
+        window.addEventListener('resize', ev => {
+            expandCanvas(canvas);
+            initScreen(gl, canvas, pMatrix);
+        });
+        expandCanvas(canvas);
+        initScreen(gl, canvas, pMatrix);
+
+        let opts = options();
+        let models = new Models();
         let video = <HTMLVideoElement>document.createElement('video');
         attach(canvas, video, this.title, models);
-        loadVideo(video, `http://127.0.0.1:${map.get('port') }/${map.get('url') }.mkv`)
+        loadVideo(video, `http://127.0.0.1:${opts.get('port') }/${opts.get('url') }.mkv`)
             .then(() => {
-                main(canvas, video, models);
+                main(gl, canvas, video, pMatrix, models);
             });
     }
 }
 
 (<any>window).main = new Main();
+
+function options() {
+    let map = new Map<string, string>();
+    location.search
+        .split(/[?&]/)
+        .map(x => x.split('='))
+        .forEach(x => map.set(x[0], x[1]));
+    return map;
+}
 
 function loadImage(src: string) {
     return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -93,20 +107,14 @@ function loadVideo(video: HTMLVideoElement, src: string) {
 
         video.addEventListener('stalled', (event: Event) => console.log('stalled', event));
         video.autoplay = true;
+        src = 'mp4_h264_aac.mp4';
+        video.loop = true;
         video.src = src;
     });
 }
 
-function initWindow(canvas: HTMLCanvasElement) {
-    window.addEventListener('resize', ev => {
-        expandCanvas(canvas);
-    });
-    expandCanvas(canvas);
-}
-
 function expandCanvas(canvas: HTMLCanvasElement) {
-    let b = document.body;
-    let d = document.documentElement;
-    canvas.width = Math.max(b.clientWidth, b.scrollWidth, d.scrollWidth, d.clientWidth);
-    canvas.height = Math.max(b.clientHeight, b.scrollHeight, d.scrollHeight, d.clientHeight);
+    let doc = document.documentElement;
+    canvas.width = doc.clientWidth;
+    canvas.height = doc.clientHeight;
 }
