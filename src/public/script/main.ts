@@ -18,7 +18,7 @@
 'use strict';
 import {initScreen, main} from './gl/index';
 import {getGLContext} from './gl/glcommon';
-import {attach} from './controller';
+import * as controller from './controller';
 import Title from './title';
 import Models from './models';
 
@@ -40,7 +40,8 @@ class Main {
         let opts = options();
         let models = new Models();
         let video = <HTMLVideoElement>document.createElement('video');
-        attach(canvas, video, this.title, models);
+        let sub = <HTMLElement>document.getElementById('sub');
+        controller.attach(canvas, sub, video, this.title, models);
         loadVideo(video, `http://127.0.0.1:${opts.get('port') }/${opts.get('url') }.mkv`)
             .then(() => {
                 main(gl, canvas, video, pMatrix, models);

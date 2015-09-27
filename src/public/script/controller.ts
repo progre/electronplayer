@@ -19,11 +19,11 @@ const IS_WIN = navigator.platform.indexOf('Win') > 0;
 
 export function attach(
     element: HTMLElement,
+    sub: HTMLElement,
     video: HTMLVideoElement,
     title: Title,
     models: Models
     ) {
-
     element.addEventListener('wheel', event => {
         // Windowsのデフォルトでは+-100 OSXだと+-1~
         let delta: number;
@@ -92,5 +92,28 @@ export function attach(
                 y: event.clientY
             };
         }
+    }
+    {
+        let timer: any = null;
+        sub.addEventListener('click', event => {
+            if (timer != null) {
+                return;
+            }
+            // 頭出し
+            let prevTime = video.currentTime;
+            video.playbackRate = 2.0;
+            timer = setInterval(() => {
+                if (video.currentTime - prevTime < 0.5 * 1.1) { // TODO: seekingで代用できる気がする
+                    clearInterval(timer);
+                    timer = null;
+                    sub.hidden = false;
+                    video.playbackRate = 1.0;
+                    return;
+                }
+                prevTime = video.currentTime;
+                sub.hidden = !sub.hidden;
+            }, 500);
+            sub.hidden = true;
+        });
     }
 }
