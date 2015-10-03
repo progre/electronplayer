@@ -18,7 +18,7 @@ const DOUBLE_PI = Math.PI * 2;
 
 export default class Models {
     public pitch = 0;
-    public yaw = 0;
+    public yaw = HALF_PI;
     public zoom = 1;
 
     addPitch(y: number) {

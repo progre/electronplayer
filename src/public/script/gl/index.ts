@@ -39,7 +39,8 @@ export function main(gl: WebGLRenderingContext, canvas: HTMLCanvasElement, video
             gl,
             shaderProgram.locations,
             model.positionBuffer,
-            model.textureCoordBuffer,
+            model.texCoord1Buffer,
+            model.texCoord2Buffer,
             texture,
             pMatrix,
             mvMatrix);

@@ -16,54 +16,78 @@
 import * as glcommon from './glcommon';
 
 let vertexShaderSource = `
-    attribute vec3 aVertexPosition;
-    attribute vec2 aTextureCoord;
+    attribute vec3 position;
+    attribute vec2 texCoord1;
+    attribute vec2 texCoord2;
 
-    uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
+    uniform mat4 mvMatrix;
+    uniform mat4 pMatrix;
 
-    varying vec2 vTextureCoord;
+    varying vec2 vTexCoord1;
+    varying vec2 vTexCoord2;
+    varying float vX;
 
     void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-        vTextureCoord = aTextureCoord;
+        gl_Position = pMatrix * mvMatrix * vec4(position, 1.0);
+        vTexCoord1 = texCoord1;
+        vTexCoord2 = texCoord2;
+        vX = position.x;
     }
 `;
 
 let fragmentShaderSource = `
     precision mediump float;
 
-    varying vec2 vTextureCoord;
+    varying vec2 vTexCoord1;
+    varying vec2 vTexCoord2;
+    varying float vX;
 
-    uniform sampler2D uSampler;
+    uniform sampler2D sampler;
+    uniform bool use2ndTexCoord;
 
     void main(void) {
-        vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-        gl_FragColor = vec4(textureColor.rgb, textureColor.a);
+        if (!use2ndTexCoord) {
+            gl_FragColor = texture2D(sampler, vec2(vTexCoord1.s, vTexCoord1.t));
+        } else {
+            vec4 color1 = texture2D(sampler, vec2(vTexCoord1.s, vTexCoord1.t));
+            vec4 color2 = texture2D(sampler, vec2(vTexCoord2.s, vTexCoord2.t));
+
+            if (vX < 0.5) {
+                gl_FragColor = color1;
+            } else {
+                gl_FragColor = color2;
+            }
+        }
     }
 `;
 
 export interface Locations {
-    vertexPosition: number;
-    textureCoord: number;
+    position: number;
+    texCoord1: number;
+    texCoord2: number;
     pMatrix: WebGLUniformLocation;
     mvMatrix: WebGLUniformLocation;
     sampler: WebGLUniformLocation;
+    use2ndTexCoord: WebGLUniformLocation;
 }
 
 export function createShaderProgram(gl: WebGLRenderingContext) {
     let program = glcommon.createProgram(gl, fragmentShaderSource, vertexShaderSource);
     let locations = <Locations>{};
     gl.useProgram(program);
-    locations.vertexPosition = gl.getAttribLocation(program, 'aVertexPosition');
-    gl.enableVertexAttribArray(locations.vertexPosition);
+    locations.position = gl.getAttribLocation(program, 'position');
+    gl.enableVertexAttribArray(locations.position);
 
-    locations.textureCoord = gl.getAttribLocation(program, 'aTextureCoord');
-    gl.enableVertexAttribArray(locations.textureCoord);
+    locations.texCoord1 = gl.getAttribLocation(program, 'texCoord1');
+    gl.enableVertexAttribArray(locations.texCoord1);
 
-    locations.pMatrix = gl.getUniformLocation(program, 'uPMatrix');
-    locations.mvMatrix = gl.getUniformLocation(program, 'uMVMatrix');
-    locations.sampler = gl.getUniformLocation(program, 'uSampler');
+    locations.texCoord2 = gl.getAttribLocation(program, 'texCoord2');
+    gl.enableVertexAttribArray(locations.texCoord2);
+
+    locations.pMatrix = gl.getUniformLocation(program, 'pMatrix');
+    locations.mvMatrix = gl.getUniformLocation(program, 'mvMatrix');
+    locations.sampler = gl.getUniformLocation(program, 'sampler');
+    locations.use2ndTexCoord = gl.getUniformLocation(program, 'use2ndTexCoord');
     return { program, locations };
 }
 
@@ -71,16 +95,22 @@ export function attach(
     gl: WebGLRenderingContext,
     locations: Locations,
     positionBuffer: WebGLBuffer,
-    textureCoordBuffer: WebGLBuffer,
+    texCoord1Buffer: WebGLBuffer,
+    texCoord2Buffer: WebGLBuffer,
     texture: WebGLTexture,
     pMatrix: GLM.IArray,
     mvMatrix: GLM.IArray
     ) {
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.vertexAttribPointer(locations.vertexPosition, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(locations.position, 3, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-    gl.vertexAttribPointer(locations.textureCoord, 2, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, texCoord1Buffer);
+    gl.vertexAttribPointer(locations.texCoord1, 2, gl.FLOAT, false, 0, 0);
+
+    if (texCoord2Buffer != null) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, texCoord2Buffer);
+        gl.vertexAttribPointer(locations.texCoord2, 2, gl.FLOAT, false, 0, 0);
+    }
 
     gl.uniform1i(locations.sampler, 0);
     gl.activeTexture(gl.TEXTURE0);
@@ -88,4 +118,6 @@ export function attach(
 
     gl.uniformMatrix4fv(locations.pMatrix, false, pMatrix);
     gl.uniformMatrix4fv(locations.mvMatrix, false, mvMatrix);
+
+    gl.uniform1i(locations.use2ndTexCoord, texCoord2Buffer !== null ? 1 : 0);
 }

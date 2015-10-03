@@ -42,9 +42,13 @@ class Main {
         let video = <HTMLVideoElement>document.createElement('video');
         let sub = <HTMLElement>document.getElementById('sub');
         controller.attach(canvas, sub, video, this.title, models);
-        loadVideo(video, `http://127.0.0.1:${opts.get('port') }/${opts.get('url') }.mkv`)
-            .then(() => {
-                main(gl, canvas, video, pMatrix, models);
+        // loadVideo(video, `http://127.0.0.1:${opts.get('port') }/${opts.get('url') }.mkv`)
+            // .then(() => {
+            //     main(gl, canvas, video, pMatrix, models);
+            // });
+        loadImage('dualfisheye.jpg')
+            .then(image => {
+                main(gl, canvas, <any>image, pMatrix, models);
             });
     }
 }
@@ -108,8 +112,6 @@ function loadVideo(video: HTMLVideoElement, src: string) {
 
         video.addEventListener('stalled', (event: Event) => console.log('stalled', event));
         video.autoplay = true;
-        src = 'mp4_h264_aac.mp4';
-        video.loop = true;
         video.src = src;
     });
 }
