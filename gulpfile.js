@@ -7,7 +7,16 @@ require('./gulp/copy')();
 require('./gulp/jade')();
 require('./gulp/stylus')();
 require('./gulp/test')();
-require('./gulp/ts')();
+require('./gulp/ts')({
+    browserify: [
+        {
+            src: 'src/public/script/main.ts',
+            dest: 'lib/public/script/'
+        }, {
+            src: 'src/public/script/dfadjust.ts',
+            dest: 'lib/public/script/'
+        }]
+});
 
 gulp.task('default', ['build', 'watch']);
 

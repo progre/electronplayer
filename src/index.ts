@@ -20,14 +20,16 @@ require('crash-reporter').start();
 import * as fs from 'fs';
 import * as log4js from 'log4js';
 const promisify: (func: Function) => (...args: any[]) => Promise<any> = require('bluebird').promisify;
+import * as app from 'app';
+import * as BrowserWindow from 'browser-window';
 import Loader from './server/loader';
 import MKVServer from './server/mkvserver';
-const app = require('app');
-const BrowserWindow = require('browser-window');
+import {createAppMenu} from './server/appmenu';
+
 const logger = log4js.getLogger();
 
 let cacheDir = app.getPath('userData') + '/StreamCache';
-let mainWindow: any = null;
+let mainWindow: GitHubElectron.BrowserWindow = null;
 let url = argv()[0];
 
 initFfmpeg();
@@ -40,6 +42,7 @@ Promise.all(
     .then(results => {
         let port = results[0];
         mainWindow = new BrowserWindow({ width: 800, height: 600 });
+        mainWindow.setMenu(createAppMenu(mainWindow.webContents));
         mainWindow.loadUrl(
             `file://${__dirname}/public/index.html?port=${port}&url=${encodeURIComponent(url) }`);
     })

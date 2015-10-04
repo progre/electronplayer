@@ -1,0 +1,41 @@
+//- Sphere Live Stream Player
+//- Copyright (C) 2015 progre (djyayutto@gmail.com)
+
+//- This program is free software: you can redistribute it and/or modify
+//- it under the terms of the GNU General Public License as published by
+//- the Free Software Foundation, either version 3 of the License, or
+//- (at your option) any later version.
+
+//- This program is distributed in the hope that it will be useful,
+//- but WITHOUT ANY WARRANTY; without even the implied warranty of
+//- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//- GNU General Public License for more details.
+
+//- You should have received a copy of the GNU General Public License
+//- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+doctype html
+meta(charset='utf-8')
+title Sphere Live Stream Player
+link(rel='stylesheet' href='style/vendor/bootstrap.min.css')
+link(rel='stylesheet', href='style/style.css')
+.container-fluid.p-a
+  form
+    .form-group.row
+      label.col-xs-3.form-control-label.text-right(for='size') 魚眼の大きさ:
+      .col-xs-9
+        input.form-control#size(type='range', min='0', max='1', step='0.0001')
+    .form-group.row
+      label.col-xs-3.form-control-label.text-right(for='y') 魚眼のY軸:
+      .col-xs-9
+        input.form-control#y(type='range', min='0', max='1', step='0.0001')
+    .form-group.row
+      label.col-xs-3.form-control-label.text-right(for='left') 左魚眼のX軸:
+      .col-xs-9
+        input.form-control#left(type='range', min='0', max='1', step='0.0001')
+    .form-group.row
+      label.col-xs-3.form-control-label.text-right(for='right') 右魚眼のX軸:
+      .col-xs-9
+        input.form-control#right(type='range', min='0', max='1', step='0.0001')
+script window.$ = window.jQuery = require('./script/vendor/jquery.min.js');
+script(src='script/vendor/bootstrap.min.js')
+script(src='script/dfadjust.js')

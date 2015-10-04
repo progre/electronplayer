@@ -38,18 +38,16 @@ export function createShader(gl: WebGLRenderingContext, source: string, type: nu
     return shader;
 }
 
-export function createPositionBuffer(gl: WebGLRenderingContext, data: Float32Array) {
+export function createVertexBuffer(gl: WebGLRenderingContext, data: Float32Array) {
     let buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
     return buffer;
 }
 
-export function createTextureCoordBuffer(gl: WebGLRenderingContext, data: Float32Array) {
-    let buffer = gl.createBuffer();
+export function updateVertexBuffer(gl: WebGLRenderingContext, buffer: WebGLBuffer, data: Float32Array) {
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    return buffer;
 }
 
 export function createIndexBuffer(gl: WebGLRenderingContext, data: Uint16Array) {

@@ -13,45 +13,61 @@
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import {getGLContext} from './glcommon';
 import * as shader from './shader';
-import {createModel, Model} from './model';
+import * as model from './model';
 import Models from '../models';
 
-export function main(gl: WebGLRenderingContext, canvas: HTMLCanvasElement, video: HTMLVideoElement, pMatrix: GLM.IArray, models: Models) {
-    let shaderProgram = shader.createShaderProgram(gl);
-    let model = createModel(gl);
-    let texture = createTexture(gl, video);
+export default class GLRenderer {
+    private pMatrix = mat4.create(); // perspective matrix (投影)
+    private gl: WebGLRenderingContext;
+    private m: model.Model;
+    modelParams: model.ModelParams;
 
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-    gl.clearColor(0.02, 0.04, 0.1, 1.0);
-    gl.cullFace(gl.BACK);
+    constructor(private canvas: HTMLCanvasElement) {
+        this.gl = getGLContext(canvas);
+        this.updateScreen();
+    }
 
-    let mvMatrix = mat4.create(); // model view matrix
+    start(video: HTMLVideoElement, models: Models) {
+        let shaderProgram = shader.createShaderProgram(this.gl);
+        this.modelParams = model.createModelParams();
+        this.m = model.createModel(this.gl, this.modelParams);
+        let texture = createTexture(this.gl, video);
 
-    let renderer = function() {
+        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, 1);
+        this.gl.clearColor(0.02, 0.04, 0.1, 1.0);
+        this.gl.cullFace(this.gl.BACK);
+
+        let mvMatrix = mat4.create(); // model view matrix
+
+        let renderer = () => {
+            requestAnimationFrame(renderer);
+
+            updateCamera(mvMatrix, models);
+            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+            this.gl.enable(this.gl.CULL_FACE);
+            updateTexture(this.gl, texture, video);
+            shader.attach(
+                this.gl,
+                shaderProgram.locations,
+                this.m,
+                texture,
+                this.pMatrix,
+                mvMatrix);
+            draw(this.gl, this.m);
+        };
         requestAnimationFrame(renderer);
+    }
 
-        updateCamera(mvMatrix, models);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.enable(gl.CULL_FACE);
-        updateTexture(gl, texture, video);
-        shader.attach(
-            gl,
-            shaderProgram.locations,
-            model.positionBuffer,
-            model.texCoord1Buffer,
-            model.texCoord2Buffer,
-            texture,
-            pMatrix,
-            mvMatrix);
-        draw(gl, model);
-    };
-    requestAnimationFrame(renderer);
-}
+    updateScreen() {
+        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        mat4.perspective(this.pMatrix, 45, this.canvas.width / this.canvas.height, 0.1, 100.0);
+    }
 
-export function initScreen(gl: WebGLRenderingContext, canvas: HTMLCanvasElement, pMatrix: GLM.IArray) {
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    mat4.perspective(pMatrix, 45, canvas.width / canvas.height, 0.1, 100.0);
+    updateModelParams(params: model.ModelParams) {
+        model.updateModel(this.gl, this.m, params);
+    }
 }
 
 function createTexture(gl: WebGLRenderingContext, image: HTMLImageElement|HTMLVideoElement) {
@@ -83,7 +99,7 @@ function updateCamera(mvMatrix: GLM.IArray, models: Models) {
     mat4.rotateY(mvMatrix, mvMatrix, -models.yaw);
 }
 
-function draw(gl: WebGLRenderingContext, model: Model) {
+function draw(gl: WebGLRenderingContext, model: model.Model) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.indexBuffer);
     gl.drawElements(gl.TRIANGLES, model.indexCount, gl.UNSIGNED_SHORT, 0);
 }

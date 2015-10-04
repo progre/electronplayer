@@ -13,29 +13,48 @@
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-/// <reference path="../../../node_modules/typescript/lib/lib.es6.d.ts" />
-/// <reference path="../../../typings/DefinitelyTyped/gl-matrix/gl-matrix.d.ts" />
+/// <reference path="typings.d.ts" />
 'use strict';
-import {initScreen, main} from './gl/index';
-import {getGLContext} from './gl/glcommon';
+declare const require: any;
+const _require = require;
+const ipc: GitHubElectron.InProcess = _require('ipc');
+import GLRenderer from './gl/index';
 import * as controller from './controller';
 import Title from './title';
 import Models from './models';
 
-class Main {
+export default class Main {
     private title = new Title(document);
+    private glRenderer: GLRenderer;
+    private dualFisheyeAdjustment: GitHubElectron.BrowserWindowProxy;
 
     constructor() {
+        ipc.on('openDualFisheyeAdjustment', () => {
+            if (this.dualFisheyeAdjustment == null) {
+                this.dualFisheyeAdjustment = window.open('dfadjust.html', 'dualFisheyeAdjustment');
+            }
+        });
+
+        window.addEventListener('message', event => {
+            let data = JSON.parse(event.data);
+            switch (data.method) {
+                case 'modelParams':
+                    this.dualFisheyeAdjustment.postMessage(JSON.stringify({ method: 'modelParams', arg: this.glRenderer.modelParams }), '*');
+                    break;
+                case 'updateModelParams':
+                    this.glRenderer.updateModelParams(data.arg);
+                    break;
+            }
+        });
+
         let canvas = <HTMLCanvasElement>document.getElementById('canvas');
-        let gl = getGLContext(canvas);
-        let pMatrix = mat4.create(); // perspective matrix (投影)
+        expandCanvas(canvas);
+        this.glRenderer = new GLRenderer(canvas);
 
         window.addEventListener('resize', ev => {
             expandCanvas(canvas);
-            initScreen(gl, canvas, pMatrix);
+            this.glRenderer.updateScreen();
         });
-        expandCanvas(canvas);
-        initScreen(gl, canvas, pMatrix);
 
         let opts = options();
         let models = new Models();
@@ -43,12 +62,12 @@ class Main {
         let sub = <HTMLElement>document.getElementById('sub');
         controller.attach(canvas, sub, video, this.title, models);
         // loadVideo(video, `http://127.0.0.1:${opts.get('port') }/${opts.get('url') }.mkv`)
-            // .then(() => {
-            //     main(gl, canvas, video, pMatrix, models);
-            // });
+        // .then(() => {
+        // glRenderer.start(video, models);
+        // });
         loadImage('dualfisheye.jpg')
             .then(image => {
-                main(gl, canvas, <any>image, pMatrix, models);
+                this.glRenderer.start(<any>image, models);
             });
     }
 }
