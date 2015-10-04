@@ -21,18 +21,18 @@ export function createAppMenu(webContents: GitHubElectron.WebContents) {
         submenu: [
             {
                 label: 'Equirectangular',
+                click: () => webContents.send('setSourceType', 'equirectangular')
             },
             {
-                label: 'DualFisheye'
+                label: 'DualFisheye',
+                click: () => webContents.send('setSourceType', 'dualFisheye')
             },
             {
                 type: 'separator'
             },
             {
                 label: 'Adjust DualFisheye ...',
-                click: () => {
-                    webContents.send('openDualFisheyeAdjustment');
-                }
+                click: () => webContents.send('openDualFisheyeAdjustment')
             }
         ]
     }]);

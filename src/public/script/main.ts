@@ -19,9 +19,9 @@ declare const require: any;
 const _require = require;
 const ipc: GitHubElectron.InProcess = _require('ipc');
 import GLRenderer from './gl/index';
+import ViewParams from './gl/viewparams';
 import * as controller from './controller';
 import Title from './title';
-import Models from './models';
 
 export default class Main {
     private title = new Title(document);
@@ -34,6 +34,11 @@ export default class Main {
                 this.dualFisheyeAdjustment = window.open('dfadjust.html', 'dualFisheyeAdjustment');
             }
         });
+        ipc.on('setSourceType', (type: string) => {
+            let params = this.glRenderer.modelParams;
+            params.type = type;
+            this.glRenderer.updateModelParams(params);
+        });
 
         window.addEventListener('message', event => {
             let data = JSON.parse(event.data);
@@ -44,6 +49,8 @@ export default class Main {
                 case 'updateModelParams':
                     this.glRenderer.updateModelParams(data.arg);
                     break;
+                default:
+                    throw new Error(data.method);
             }
         });
 
@@ -57,7 +64,7 @@ export default class Main {
         });
 
         let opts = options();
-        let models = new Models();
+        let models = new ViewParams();
         let video = <HTMLVideoElement>document.createElement('video');
         let sub = <HTMLElement>document.getElementById('sub');
         controller.attach(canvas, sub, video, this.title, models);
@@ -65,7 +72,8 @@ export default class Main {
         // .then(() => {
         // glRenderer.start(video, models);
         // });
-        loadImage('dualfisheye.jpg')
+        console.log('oppai2');
+        loadImage('dualfisheye.png')
             .then(image => {
                 this.glRenderer.start(<any>image, models);
             });
@@ -94,6 +102,7 @@ function loadImage(src: string) {
             resolve(image);
         };
         image.src = src;
+        console.log(src);
     });
 }
 

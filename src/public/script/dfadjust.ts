@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /// <reference path="typings.d.ts" />
-import Main from './main';
-
 $('ready', () => {
     modelParams().then(params => {
         $('#size')
@@ -51,25 +49,22 @@ function modelParams() {
 }
 
 function updateModelParams(params: any) {
-    print(params.dualFisheye);
+    console.log(params.dualFisheye.size + ', ' + params.dualFisheye.y + ', ' + params.dualFisheye.left + ', ' + params.dualFisheye.right);
     window.opener.postMessage(JSON.stringify({ method: 'updateModelParams', arg: params }), '*');
 }
 
 function call(method: string, arg?: any) {
     return new Promise<any>((resolve, reject) => {
         let id = Math.floor(Math.random() * 10000000000000000);
-        window.addEventListener('message', function(event) {
+        let listener = (event: MessageEvent) => {
             let obj = JSON.parse(event.data);
             if (obj.id !== id) {
                 return;
             }
-            window.removeEventListener('message', <EventListener>arguments.callee);
+            window.removeEventListener('message', listener);
             resolve(obj.result);
-        });
+        };
+        window.addEventListener('message', listener);
         window.opener.postMessage(JSON.stringify({ id, method, arg }), '*');
     });
-}
-
-function print(params: any) {
-    console.log(params.size + ', ' + params.y + ', ' + params.left + ', ' + params.right);
 }

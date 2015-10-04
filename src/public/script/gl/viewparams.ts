@@ -16,7 +16,7 @@
 const HALF_PI = Math.PI / 2;
 const DOUBLE_PI = Math.PI * 2;
 
-export default class Models {
+export default class ViewParams {
     public pitch = 0;
     public yaw = HALF_PI;
     public zoom = 1;

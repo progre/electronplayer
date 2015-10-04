@@ -13,8 +13,8 @@
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import ViewParams from './gl/viewparams';
 import Title from './title';
-import Models from './models';
 const IS_WIN = navigator.platform.indexOf('Win') > 0;
 
 export function attach(
@@ -22,7 +22,7 @@ export function attach(
     sub: HTMLElement,
     video: HTMLVideoElement,
     title: Title,
-    models: Models
+    viewParams: ViewParams
     ) {
     element.addEventListener('wheel', event => {
         // Windowsのデフォルトでは+-100 OSXだと+-1~
@@ -65,11 +65,11 @@ export function attach(
             let x = (event.clientX - prev.x) / element.clientHeight * 4;
             let y = (event.clientY - prev.y) / element.clientHeight * 4;
             if ((event.buttons & 0x01) > 0) {
-                models.addYaw(x);
-                models.addPitch(y);
+                viewParams.addYaw(x);
+                viewParams.addPitch(y);
             }
             if ((event.buttons & 0x02) > 0) {
-                models.addZoom(y);
+                viewParams.addZoom(y);
             }
             prev = toXY(event);
         });
@@ -102,17 +102,19 @@ export function attach(
             // 頭出し
             let prevTime = video.currentTime;
             video.playbackRate = 2.0;
-            timer = setInterval(() => {
-                if (video.currentTime - prevTime < 0.5 * 1.1) { // TODO: seekingで代用できる気がする
-                    clearInterval(timer);
-                    timer = null;
-                    sub.hidden = false;
-                    video.playbackRate = 1.0;
-                    return;
-                }
-                prevTime = video.currentTime;
-                sub.hidden = !sub.hidden;
-            }, 500);
+            timer = setInterval(
+                () => {
+                    if (video.currentTime - prevTime < 0.5 * 1.1) { // TODO: seekingで代用できる気がする
+                        clearInterval(timer);
+                        timer = null;
+                        sub.hidden = false;
+                        video.playbackRate = 1.0;
+                        return;
+                    }
+                    prevTime = video.currentTime;
+                    sub.hidden = !sub.hidden;
+                },
+                500);
             sub.hidden = true;
         });
     }

@@ -15,24 +15,25 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import {getGLContext} from './glcommon';
 import * as shader from './shader';
-import * as model from './model';
-import Models from '../models';
+import Model from './model';
+import ViewParams from './viewparams';
+import ModelParams from './modelparams';
 
 export default class GLRenderer {
     private pMatrix = mat4.create(); // perspective matrix (投影)
     private gl: WebGLRenderingContext;
-    private m: model.Model;
-    modelParams: model.ModelParams;
+    private m: Model;
+    modelParams: ModelParams;
 
     constructor(private canvas: HTMLCanvasElement) {
         this.gl = getGLContext(canvas);
         this.updateScreen();
     }
 
-    start(video: HTMLVideoElement, models: Models) {
+    start(video: HTMLVideoElement, models: ViewParams) {
         let shaderProgram = shader.createShaderProgram(this.gl);
-        this.modelParams = model.createModelParams();
-        this.m = model.createModel(this.gl, this.modelParams);
+        this.modelParams = ModelParams.getDefault();
+        this.m = new Model(this.gl, this.modelParams);
         let texture = createTexture(this.gl, video);
 
         this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, 1);
@@ -65,8 +66,8 @@ export default class GLRenderer {
         mat4.perspective(this.pMatrix, 45, this.canvas.width / this.canvas.height, 0.1, 100.0);
     }
 
-    updateModelParams(params: model.ModelParams) {
-        model.updateModel(this.gl, this.m, params);
+    updateModelParams(params: ModelParams) {
+        this.m.updateParams(params);
     }
 }
 
@@ -92,14 +93,14 @@ function updateTexture(
     gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
-function updateCamera(mvMatrix: GLM.IArray, models: Models) {
+function updateCamera(mvMatrix: GLM.IArray, models: ViewParams) {
     mat4.identity(mvMatrix);
     mat4.translate(mvMatrix, mvMatrix, [0, 0, models.zoom * 2.5 - 4.5]);
     mat4.rotateX(mvMatrix, mvMatrix, -models.pitch);
     mat4.rotateY(mvMatrix, mvMatrix, -models.yaw);
 }
 
-function draw(gl: WebGLRenderingContext, model: model.Model) {
+function draw(gl: WebGLRenderingContext, model: Model) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.indexBuffer);
     gl.drawElements(gl.TRIANGLES, model.indexCount, gl.UNSIGNED_SHORT, 0);
 }

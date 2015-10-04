@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import * as glcommon from './glcommon';
-import * as model from './model';
+import Model from './model';
 
 let vertexShaderSource = `
     attribute vec3 position;
@@ -84,7 +84,6 @@ export function createShaderProgram(gl: WebGLRenderingContext) {
     gl.enableVertexAttribArray(locations.texCoord1);
 
     locations.texCoord2 = gl.getAttribLocation(program, 'texCoord2');
-    if (locations.texCoord2 < 0) throw new Error();
     gl.enableVertexAttribArray(locations.texCoord2);
 
     locations.pMatrix = gl.getUniformLocation(program, 'pMatrix');
@@ -97,7 +96,7 @@ export function createShaderProgram(gl: WebGLRenderingContext) {
 export function attach(
     gl: WebGLRenderingContext,
     locations: Locations,
-    model: model.Model,
+    model: Model,
     texture: WebGLTexture,
     pMatrix: GLM.IArray,
     mvMatrix: GLM.IArray
