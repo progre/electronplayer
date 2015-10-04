@@ -115,10 +115,10 @@ export function createModelParams() {
     return <ModelParams>{
         type: 'dualFisheye',
         dualFisheye: {
-            size: 0.44715,
-            y:  0.4537,
-            left: 0.22425,
-            right: 0.72355
+            size: 0.4503,
+            y:  0.4536,
+            left: 0.226,
+            right: 0.7219
         }
     };
 }

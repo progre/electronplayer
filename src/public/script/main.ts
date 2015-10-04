@@ -39,7 +39,7 @@ export default class Main {
             let data = JSON.parse(event.data);
             switch (data.method) {
                 case 'modelParams':
-                    this.dualFisheyeAdjustment.postMessage(JSON.stringify({ method: 'modelParams', arg: this.glRenderer.modelParams }), '*');
+                    this.sendResult(data.id, this.glRenderer.modelParams);
                     break;
                 case 'updateModelParams':
                     this.glRenderer.updateModelParams(data.arg);
@@ -69,6 +69,10 @@ export default class Main {
             .then(image => {
                 this.glRenderer.start(<any>image, models);
             });
+    }
+
+    private sendResult(id: number, result: any) {
+        this.dualFisheyeAdjustment.postMessage(JSON.stringify({ id, result }), '*');
     }
 }
 

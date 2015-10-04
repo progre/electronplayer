@@ -16,49 +16,59 @@
 /// <reference path="typings.d.ts" />
 import Main from './main';
 
-let params: any;
 $('ready', () => {
-    window.opener.postMessage(JSON.stringify({ method: 'modelParams' }), '*');
-    window.addEventListener('message', event => {
-        let data = JSON.parse(event.data);
-        console.log(data.method === 'modelParms');
-        switch (data.method) {
-            case 'modelParams':
-                params = data.arg;
-                $('#size').val((params.dualFisheye.size * 2).toString());
-                $('#y').val(params.dualFisheye.y.toString());
-                $('#left').val((params.dualFisheye.left * 2).toString());
-                $('#right').val(((params.dualFisheye.right - 0.5) * 2).toString());
-                $('#size')
-                    .change(function() {
-                        params.dualFisheye.size = $(this).val() / 2;
-                        print(params.dualFisheye);
-                        window.opener.postMessage(JSON.stringify({ method: 'updateModelParams', arg: params }), '*');
-                    });
-                $('#y')
-                    .change(function() {
-                        params.dualFisheye.y = $(this).val();
-                        print(params.dualFisheye);
-                        window.opener.postMessage(JSON.stringify({ method: 'updateModelParams', arg: params }), '*');
-                    });
-                $('#left')
-                    .change(function() {
-                        params.dualFisheye.left = $(this).val() / 2;
-                        print(params.dualFisheye);
-                        window.opener.postMessage(JSON.stringify({ method: 'updateModelParams', arg: params }), '*');
-                    });
-                $('#right')
-                    .change(function() {
-                        params.dualFisheye.right = $(this).val() / 2 + 0.5;
-                        print(params.dualFisheye);
-                        window.opener.postMessage(JSON.stringify({ method: 'updateModelParams', arg: params }), '*');
-                    });
-                break;
-            default:
-                throw new Error(data.method);
-        }
+    modelParams().then(params => {
+        $('#size')
+            .val(<any>(params.dualFisheye.size))
+            .change(function() {
+                params.dualFisheye.size = $(this).val();
+                updateModelParams(params);
+            });
+        $('#y')
+            .val(<any>(params.dualFisheye.y))
+            .change(function() {
+                params.dualFisheye.y = $(this).val();
+                updateModelParams(params);
+            });
+
+        $('#left')
+            .val(<any>(params.dualFisheye.left))
+            .change(function() {
+                params.dualFisheye.left = $(this).val();
+                updateModelParams(params);
+            });
+        $('#right')
+            .val(<any>(params.dualFisheye.right))
+            .change(function() {
+                params.dualFisheye.right = $(this).val();
+                updateModelParams(params);
+            });
     });
 });
+
+function modelParams() {
+    return call('modelParams');
+}
+
+function updateModelParams(params: any) {
+    print(params.dualFisheye);
+    window.opener.postMessage(JSON.stringify({ method: 'updateModelParams', arg: params }), '*');
+}
+
+function call(method: string, arg?: any) {
+    return new Promise<any>((resolve, reject) => {
+        let id = Math.floor(Math.random() * 10000000000000000);
+        window.addEventListener('message', function(event) {
+            let obj = JSON.parse(event.data);
+            if (obj.id !== id) {
+                return;
+            }
+            window.removeEventListener('message', <EventListener>arguments.callee);
+            resolve(obj.result);
+        });
+        window.opener.postMessage(JSON.stringify({ id, method, arg }), '*');
+    });
+}
 
 function print(params: any) {
     console.log(params.size + ', ' + params.y + ', ' + params.left + ', ' + params.right);
