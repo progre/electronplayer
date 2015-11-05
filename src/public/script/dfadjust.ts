@@ -70,6 +70,7 @@ $('ready', () => {
             params.direction = 'right';
             updateModelParams(params);
         });
+        $('#root').show();
     });
 });
 

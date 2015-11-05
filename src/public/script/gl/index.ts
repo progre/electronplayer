@@ -21,20 +21,22 @@ import ModelParams from './modelparams';
 
 export default class GLRenderer {
     private pMatrix = mat4.create(); // perspective matrix (投影)
+    modelParams = ModelParams.getDefault();
+    private ratioOfHeight = 1;
     private gl: WebGLRenderingContext;
     private m: Model;
-    modelParams: ModelParams;
 
     constructor(private canvas: HTMLCanvasElement) {
         this.gl = getGLContext(canvas);
+        this.m = new Model(this.gl);
         this.updateScreen();
     }
 
     start(video: HTMLVideoElement, models: ViewParams) {
         let shaderProgram = shader.createShaderProgram(this.gl);
-        this.modelParams = ModelParams.getDefault(video.videoWidth / 2 / video.videoHeight);
-        this.m = new Model(this.gl, this.modelParams);
         let texture = createTexture(this.gl, video);
+        this.ratioOfHeight = video.videoWidth / 2 / video.videoHeight;
+        this.m.updateParams(this.modelParams, this.ratioOfHeight);
 
         this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, 1);
         this.gl.clearColor(0.02, 0.04, 0.1, 1.0);
@@ -68,7 +70,7 @@ export default class GLRenderer {
 
     updateModelParams(params: ModelParams) {
         this.modelParams = params;
-        this.m.updateParams(params);
+        this.m.updateParams(params, this.ratioOfHeight);
     }
 }
 

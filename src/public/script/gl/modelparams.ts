@@ -1,5 +1,4 @@
 export default class ModelParams {
-    ratioOfHeight: number;
     type: string;
     dualFisheye: {
         size: number;
@@ -9,9 +8,8 @@ export default class ModelParams {
     };
     direction: string;
 
-    static getDefault(ratioOfHeight: number) {
+    static getDefault() {
         let instance = new ModelParams();
-        instance.ratioOfHeight = ratioOfHeight;
         instance.type = 'dualFisheye';
         instance.dualFisheye = {
             size: 0.4433,

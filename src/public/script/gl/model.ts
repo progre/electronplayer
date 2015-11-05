@@ -27,7 +27,7 @@ export default class Model {
     indexCount: number;
     use2ndTexCoord: boolean;
 
-    constructor(private gl: WebGLRenderingContext, params: ModelParams) {
+    constructor(private gl: WebGLRenderingContext) {
         this.positionBuffer = gl.createBuffer();
         this.texCoord1Buffer = gl.createBuffer();
         this.texCoord2Buffer = gl.createBuffer();
@@ -47,10 +47,9 @@ export default class Model {
         }
         this.indexBuffer = glcommon.createIndexBuffer(gl, new Uint16Array(indexData));
         this.indexCount = indexData.length;
-        this.updateParams(params);
     }
 
-    updateParams(params: ModelParams) {
+    updateParams(params: ModelParams, ratioOfHeight: number) {
         let radius = 2;
         let texCoord1Array: number[] = [];
         let texCoord2Array: number[] = [];
@@ -78,13 +77,23 @@ export default class Model {
                         // positionArray.push(0);
                         // positionArray.push(latNumber / latitudeBands * -2 + 1);
                         // positionArray.push((longNumber / longitudeBands * -2 + 1) * 2);
-                        pushEquirectangular(texCoord1Array, texCoord2Array, longNumber / LONGITUDE_BANDS, latNumber / LATITUDE_BANDS);
+                        pushEquirectangular(
+                            texCoord1Array,
+                            texCoord2Array,
+                            longNumber / LONGITUDE_BANDS,
+                            latNumber / LATITUDE_BANDS);
                         break;
                     case 'dualFisheye':
                         positionArray.push(radius * -y);
                         positionArray.push(radius * x);
                         positionArray.push(radius * z);
-                        pushDualFisheye(texCoord1Array, texCoord2Array, params, longNumber / LONGITUDE_BANDS, latNumber / LATITUDE_BANDS);
+                        pushDualFisheye(
+                            texCoord1Array,
+                            texCoord2Array,
+                            params,
+                            ratioOfHeight,
+                            longNumber / LONGITUDE_BANDS,
+                            latNumber / LATITUDE_BANDS);
                         break;
                     default:
                         throw new Error();
@@ -105,7 +114,7 @@ function pushEquirectangular(texCoord1Data: number[], texCoord2Data: number[], l
     texCoord2Data.push(latitude);
 }
 
-function pushDualFisheye(texCoord1Data: number[], texCoord2Data: number[], params: ModelParams, longitude: number, latitude: number) {
+function pushDualFisheye(texCoord1Data: number[], texCoord2Data: number[], params: ModelParams, ratioOfHeight: number, longitude: number, latitude: number) {
     let rect = {
         left: {
             left: params.dualFisheye.left - params.dualFisheye.size / 2
@@ -116,12 +125,12 @@ function pushDualFisheye(texCoord1Data: number[], texCoord2Data: number[], param
         bottom: params.dualFisheye.y - params.dualFisheye.size
     };
     {
-        let {u, v} = counterclockwiseCircle(longitude, latitude * params.dualFisheye.size * 2, params.ratioOfHeight);
+        let {u, v} = counterclockwiseCircle(longitude, latitude * params.dualFisheye.size * 2, ratioOfHeight);
         texCoord1Data.push(u / 2 + rect.left.left);
         texCoord1Data.push(v + rect.bottom);
     }
     {
-        let {u, v} = clockwiseCircle(longitude, (1 - latitude) * params.dualFisheye.size * 2, params.ratioOfHeight);
+        let {u, v} = clockwiseCircle(longitude, (1 - latitude) * params.dualFisheye.size * 2, ratioOfHeight);
         texCoord2Data.push(u / 2 + rect.right.left);
         texCoord2Data.push(v + rect.bottom);
     }

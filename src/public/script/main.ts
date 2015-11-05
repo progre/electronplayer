@@ -29,17 +29,8 @@ export default class Main {
     private dualFisheyeAdjustment: GitHubElectron.BrowserWindowProxy;
 
     constructor() {
-        ipc.on('openDualFisheyeAdjustment', () => {
-            if (this.dualFisheyeAdjustment == null) {
-                this.dualFisheyeAdjustment = window.open('dfadjust.html', 'dualFisheyeAdjustment');
-            }
-        });
-        ipc.on('setSourceType', (type: string) => {
-            let params = this.glRenderer.modelParams;
-            params.type = type;
-            this.glRenderer.updateModelParams(params);
-        });
-
+        ipc.on('openDualFisheyeAdjustment', () => this.openDualFisheyeAdjustment());
+        ipc.on('setSourceType', (type: string) => this.setSourceType(type));
         window.addEventListener('message', event => {
             let data = JSON.parse(event.data);
             switch (data.method) {
@@ -76,6 +67,21 @@ export default class Main {
         //     .then(image => {
         //         this.glRenderer.start(<any>image, models);
         //     });
+    }
+
+    private openDualFisheyeAdjustment() {
+        let adjustment = this.dualFisheyeAdjustment;
+        if (adjustment == null || adjustment.closed) {
+            this.dualFisheyeAdjustment = window.open('dfadjust.html', 'dualFisheyeAdjustment');
+        } else {
+            adjustment.focus();
+        }
+    }
+
+    private setSourceType(type: string) {
+        let params = this.glRenderer.modelParams;
+        params.type = type;
+        this.glRenderer.updateModelParams(params);
     }
 
     private sendResult(id: number, result: any) {
