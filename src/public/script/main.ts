@@ -68,15 +68,14 @@ export default class Main {
         let video = <HTMLVideoElement>document.createElement('video');
         let sub = <HTMLElement>document.getElementById('sub');
         controller.attach(canvas, sub, video, this.title, models);
-        // loadVideo(video, `http://127.0.0.1:${opts.get('port') }/${opts.get('url') }.mkv`)
-        // .then(() => {
-        // glRenderer.start(video, models);
-        // });
-        console.log('oppai2');
-        loadImage('dualfisheye.png')
-            .then(image => {
-                this.glRenderer.start(<any>image, models);
+        loadVideo(video, `http://127.0.0.1:${opts.get('port') }/${opts.get('url') }.mkv`)
+            .then(() => {
+                this.glRenderer.start(video, models);
             });
+        // loadImage('dualfisheye.png')
+        //     .then(image => {
+        //         this.glRenderer.start(<any>image, models);
+        //     });
     }
 
     private sendResult(id: number, result: any) {

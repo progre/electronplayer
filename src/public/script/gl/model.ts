@@ -16,8 +16,8 @@
 import * as glcommon from './glcommon';
 import ModelParams from './modelparams';
 
-const LATITUDE_BANDS = 90;
-const LONGITUDE_BANDS = 16;
+const LATITUDE_BANDS = 40;
+const LONGITUDE_BANDS = 40;
 
 export default class Model {
     positionBuffer: WebGLBuffer;
@@ -116,12 +116,12 @@ function pushDualFisheye(texCoord1Data: number[], texCoord2Data: number[], param
         bottom: params.dualFisheye.y - params.dualFisheye.size
     };
     {
-        let {u, v} = counterclockwiseCircle(longitude, latitude * params.dualFisheye.size * 2);
+        let {u, v} = counterclockwiseCircle(longitude, latitude * params.dualFisheye.size * 2, params.ratioOfHeight);
         texCoord1Data.push(u / 2 + rect.left.left);
         texCoord1Data.push(v + rect.bottom);
     }
     {
-        let {u, v} = clockwiseCircle(longitude, (1 - latitude) * params.dualFisheye.size * 2);
+        let {u, v} = clockwiseCircle(longitude, (1 - latitude) * params.dualFisheye.size * 2, params.ratioOfHeight);
         texCoord2Data.push(u / 2 + rect.right.left);
         texCoord2Data.push(v + rect.bottom);
     }
@@ -132,16 +132,16 @@ function pushDualFisheye(texCoord1Data: number[], texCoord2Data: number[], param
  * [0, 1], [0, 0], [1, 1], [1, 0]の範囲で描く
  * angleは0.0~1.0
  */
-function clockwiseCircle(angle: number, radius: number) {
+function clockwiseCircle(angle: number, radius: number, ratioOfHeight: number) {
     return {
         u: (Math.sin(angle * 2 * Math.PI + Math.PI / 2) * radius * 2 + 1) / 2,
-        v: (Math.cos(angle * 2 * Math.PI + Math.PI / 2) * radius * 2 + 1) / 2
+        v: (Math.cos(angle * 2 * Math.PI + Math.PI / 2) * radius * ratioOfHeight * 2 + 1) / 2
     };
 }
 
-function counterclockwiseCircle(angle: number, radius: number) {
+function counterclockwiseCircle(angle: number, radius: number, ratioOfHeight: number) {
     return {
         u: (Math.cos(angle * 2 * Math.PI + Math.PI) * radius * 2 + 1) / 2,
-        v: (Math.sin(angle * 2 * Math.PI + Math.PI) * radius * 2 + 1) / 2
+        v: (Math.sin(angle * 2 * Math.PI + Math.PI) * radius * ratioOfHeight * 2 + 1) / 2
     };
 }

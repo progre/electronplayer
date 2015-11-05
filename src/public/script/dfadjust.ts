@@ -41,6 +41,35 @@ $('ready', () => {
                 params.dualFisheye.right = $(this).val();
                 updateModelParams(params);
             });
+        switch (params.direction) {
+            case 'left':
+                $('#directionLeft').addClass('active');
+                $('#directionUp').removeClass('active');
+                $('#directionRight').removeClass('active');
+                break;
+            case 'up':
+                $('#directionLeft').removeClass('active');
+                $('#directionUp').addClass('active');
+                $('#directionRight').removeClass('active');
+                break;
+            case 'right':
+                $('#directionLeft').removeClass('active');
+                $('#directionUp').removeClass('active');
+                $('#directionRight').addClass('active');
+                break;
+        }
+        $('#directionLeft').change(function() {
+            params.direction = 'left';
+            updateModelParams(params);
+        });
+        $('#directionUp').change(function() {
+            params.direction = 'up';
+            updateModelParams(params);
+        });
+        $('#directionRight').change(function() {
+            params.direction = 'right';
+            updateModelParams(params);
+        });
     });
 });
 
@@ -49,7 +78,7 @@ function modelParams() {
 }
 
 function updateModelParams(params: any) {
-    console.log(params.dualFisheye.size + ', ' + params.dualFisheye.y + ', ' + params.dualFisheye.left + ', ' + params.dualFisheye.right);
+    console.log(params.dualFisheye.size + ', ' + params.dualFisheye.y + ', ' + params.dualFisheye.left + ', ' + params.dualFisheye.right + ', ' + params.direction);
     window.opener.postMessage(JSON.stringify({ method: 'updateModelParams', arg: params }), '*');
 }
 

@@ -32,7 +32,7 @@ export default class GLRenderer {
 
     start(video: HTMLVideoElement, models: ViewParams) {
         let shaderProgram = shader.createShaderProgram(this.gl);
-        this.modelParams = ModelParams.getDefault();
+        this.modelParams = ModelParams.getDefault(video.videoWidth / 2 / video.videoHeight);
         this.m = new Model(this.gl, this.modelParams);
         let texture = createTexture(this.gl, video);
 
@@ -45,7 +45,7 @@ export default class GLRenderer {
         let renderer = () => {
             requestAnimationFrame(renderer);
 
-            updateCamera(mvMatrix, models);
+            updateCamera(mvMatrix, models, this.modelParams.direction);
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
             this.gl.enable(this.gl.CULL_FACE);
             updateTexture(this.gl, texture, video);
@@ -67,11 +67,12 @@ export default class GLRenderer {
     }
 
     updateModelParams(params: ModelParams) {
+        this.modelParams = params;
         this.m.updateParams(params);
     }
 }
 
-function createTexture(gl: WebGLRenderingContext, image: HTMLImageElement|HTMLVideoElement) {
+function createTexture(gl: WebGLRenderingContext, image: HTMLImageElement | HTMLVideoElement) {
     let texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, <any>image);
@@ -87,17 +88,31 @@ function updateTexture(
     gl: WebGLRenderingContext,
     texture: WebGLTexture,
     video: HTMLVideoElement
-    ) {
+) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, video);
     gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
-function updateCamera(mvMatrix: GLM.IArray, models: ViewParams) {
+function updateCamera(mvMatrix: GLM.IArray, models: ViewParams, direction: string) {
     mat4.identity(mvMatrix);
     mat4.translate(mvMatrix, mvMatrix, [0, 0, models.zoom * 2.5 - 4.5]);
-    mat4.rotateX(mvMatrix, mvMatrix, -models.pitch);
-    mat4.rotateY(mvMatrix, mvMatrix, -models.yaw);
+    switch (direction) {
+        case 'left':
+            mat4.rotateX(mvMatrix, mvMatrix, Math.PI * 3 / 2 - models.pitch);
+            mat4.rotateZ(mvMatrix, mvMatrix, -models.yaw);
+            break;
+        case 'up':
+            mat4.rotateX(mvMatrix, mvMatrix, -models.pitch);
+            mat4.rotateY(mvMatrix, mvMatrix, -models.yaw);
+            break;
+        case 'right':
+            mat4.rotateX(mvMatrix, mvMatrix, Math.PI / 2 - models.pitch);
+            mat4.rotateZ(mvMatrix, mvMatrix, models.yaw);
+            break;
+        default:
+            throw new Error('Unsupported direction: ' + direction);
+    }
 }
 
 function draw(gl: WebGLRenderingContext, model: Model) {
