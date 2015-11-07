@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import ViewParams from './gl/viewparams';
 import Title from './title';
-const IS_WIN = navigator.platform.indexOf('Win') > 0;
+const IS_WIN = navigator.platform.indexOf('Win') >= 0;
 
 export function attach(
     element: HTMLElement,
@@ -28,7 +28,7 @@ export function attach(
         // Windowsのデフォルトでは+-100 OSXだと+-1~
         let delta: number;
         if (IS_WIN) {
-            delta = event.deltaY < 0 ? -0.05 : 0.05;
+            delta = event.deltaY > 0 ? -0.05 : 0.05;
         } else {
             delta = event.deltaY / 1000;
         }

@@ -81,7 +81,7 @@ export default class Model {
                             texCoord1Array,
                             texCoord2Array,
                             longNumber / LONGITUDE_BANDS,
-                            latNumber / LATITUDE_BANDS);
+                            1 - latNumber / LATITUDE_BANDS);
                         break;
                     case 'dualFisheye':
                         positionArray.push(radius * -y);

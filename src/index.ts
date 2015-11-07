@@ -30,7 +30,7 @@ const logger = log4js.getLogger();
 
 let cacheDir = app.getPath('userData') + '/StreamCache';
 let mainWindow: GitHubElectron.BrowserWindow = null;
-let url = argv()[0];
+let url = argv()[0].replace('/pls/', '/stream/');
 
 initFfmpeg();
 Promise.all(
