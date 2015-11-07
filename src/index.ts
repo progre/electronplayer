@@ -15,39 +15,47 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /// <reference path="./typings.d.ts" />
 'use strict';
-require('source-map-support').install();
+try { require('source-map-support').install(); } catch (e) { /* empty */ }
 require('crash-reporter').start();
 import * as fs from 'fs';
 import * as log4js from 'log4js';
 const promisify: (func: Function) => (...args: any[]) => Promise<any> = require('bluebird').promisify;
+const logger = log4js.getLogger();
 import * as app from 'app';
 import * as BrowserWindow from 'browser-window';
 import Loader from './server/loader';
 import MKVServer from './server/mkvserver';
 import {createAppMenu} from './server/appmenu';
+log4js.configure({
+    appenders: [{
+        type: 'console',
+        layout: { type: 'basic' }
+    }]
+});
 
-const logger = log4js.getLogger();
-
-let cacheDir = app.getPath('userData') + '/StreamCache';
-let mainWindow: GitHubElectron.BrowserWindow = null;
-let url = argv()[0].replace('/pls/', '/stream/');
-
-initFfmpeg();
-Promise.all(
-    [
-        initCacheDir(cacheDir)
-            .then(() => new MKVServer(cacheDir).listen()),
-        new Promise((resolve, reject) => app.on('ready', resolve))
-    ])
+Promise.resolve()
+    .then(() => {
+        let cacheDir = app.getPath('userData') + '/StreamCache';
+        initFfmpeg();
+        return Promise.all<any>([
+            initCacheDir(cacheDir)
+                .then(() => new MKVServer(cacheDir).listen()),
+            getUrl(argv()[0]),
+            new Promise((resolve, reject) => app.on('ready', resolve))
+        ]);
+    })
     .then(results => {
         let port = results[0];
-        mainWindow = new BrowserWindow({ width: 800, height: 600 });
+        let url = results[1];
+        logger.info(url);
+        let mainWindow = new BrowserWindow({ width: 800, height: 600 });
         mainWindow.setMenu(createAppMenu(mainWindow.webContents));
         mainWindow.loadUrl(
             `file://${__dirname}/public/index.html?port=${port}&url=${encodeURIComponent(url) }`);
     })
-    .catch((err: any) => {
-        logger.fatal(err.stack);
+    .catch((e) => {
+        logger.fatal(e);
+        app.quit();
     });
 
 function initFfmpeg() {
@@ -83,4 +91,12 @@ function argv() {
         return originalArgv.splice(2);
     }
     return originalArgv.splice(1);
+}
+
+function getUrl(arg: string) {
+    if (arg.indexOf('http') === 0) {
+        return Promise.resolve(arg.replace('/pls/', '/stream/'));
+    }
+    return promisify(fs.readFile)(arg, 'ascii')
+        .then(data => data.split('\r')[0]);
 }
