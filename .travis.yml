@@ -1,7 +1,7 @@
 language: node_js
 node_js: 4.1
 env:
-  APP_NAME=youtubeuploader
+  APP_NAME=sphereplayer
 before_script:
   - npm install gulp
 before_deploy:
