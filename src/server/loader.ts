@@ -13,6 +13,7 @@
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import * as stream from 'stream';
 import * as FfmpegCommand from 'fluent-ffmpeg';
 
 export default class Loader {
@@ -26,14 +27,16 @@ export default class Loader {
         return this.runningCommand != null;
     }
 
-    load(url: string, filePath: string) {
+    load(url: string, writable: stream.Writable) {
         return new Promise((resolve, reject) => {
+            console.log(url);
             this.runningCommand = FfmpegCommand(url)
                 .audioCodec('copy')
                 .videoCodec('copy')
+                .format('matroska')
                 .on('error', reject) // killした時もerrorになるらしい
                 .on('end', resolve)
-                .save(filePath);
+                .pipe(writable, {end:true});
         }).then(() => {
             this.runningCommand = null;
         }).catch(err => {

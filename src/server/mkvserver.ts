@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import * as http from 'http';
 import * as fs from 'fs';
+import * as stream from 'stream';
 let bluebird = require('bluebird');
 let testTcp = require('test-tcp');
 import {v4 as uuid} from 'node-uuid';
@@ -51,17 +52,13 @@ export default class MKVServer {
         request.on('close', () => {
             loader.kill();
         });
-        let filePath = this.cachePath + '/' + uuid() + '.mkv';
-        fetch(loader, url, filePath, buffer => {
-            response.write(buffer);
-        }).then(() => {
-            response.end();
-        }).catch(err => {
-            if (!response.sendDate) {
-                response.writeHead(500);
-            }
-            response.end();
-        });
+        loader.load(url, response)
+            .catch(err => {
+                if (!response.sendDate) {
+                    response.writeHead(500);
+                    response.end();
+                }
+            });
     }
 
     private parseUrl(url: string) {
@@ -71,52 +68,4 @@ export default class MKVServer {
         }
         return decodeURIComponent(m[1]);
     }
-}
-
-function fetch(loader: Loader, url: string, filePath: string, listener: (buffer: Buffer) => void) {
-    loader.load(url, filePath)
-        .catch(err => {
-            console.error(err);
-        });
-    return openRetryable(filePath, 10)
-        .then(fd => {
-            let bufferSize = 1 * 1024 * 1024;
-            let buffer = new Buffer(bufferSize);
-            return readRecursive(fd, buffer, loader, listener)
-                .then(() => bluebird.promisify(fs.close)(fd))
-                .catch(() => bluebird.promisify(fs.close)(fd));
-        });
-}
-
-function openRetryable(filePath: string, count: number) {
-    return <Promise<number>>bluebird.promisify(fs.open)(filePath, 'r')
-        .catch((err: Error) => {
-            if (--count === 0) {
-                return Promise.reject(err);
-            }
-            return bluebird.delay(1000)
-                .then(() => openRetryable(filePath, count));
-        });
-}
-
-function readRecursive(
-    fd: number,
-    buffer: Buffer,
-    loader: Loader,
-    listener: (buffer: Buffer) => void): Promise<void> {
-    return bluebird.promisify(fs.read)(fd, buffer, 0, buffer.length, null)
-        .then((obj: any[]) => {
-            let bytesRead = obj[0];
-            let buf = obj[1];
-            if (bytesRead === 0) {
-                if (!loader.running) {
-                    return;
-                }
-                return bluebird.delay(1000)
-                    .then(() => readRecursive(fd, buf, loader, listener));
-            } else {
-                listener(buf.slice(0, bytesRead));
-            }
-            return readRecursive(fd, buf, loader, listener);
-        });
 }

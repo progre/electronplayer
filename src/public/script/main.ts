@@ -72,7 +72,10 @@ export default class Main {
     private openDualFisheyeAdjustment() {
         let adjustment = this.dualFisheyeAdjustment;
         if (adjustment == null || adjustment.closed) {
-            this.dualFisheyeAdjustment = window.open('dfadjust.html', 'dualFisheyeAdjustment');
+            this.dualFisheyeAdjustment = window.open(
+                'dfadjust.html',
+                'dualFisheyeAdjustment',
+                'width=460, height=360');
         } else {
             adjustment.focus();
         }
@@ -119,10 +122,10 @@ function loadVideo(video: HTMLVideoElement, src: string) {
             resolve();
         });
         video.addEventListener('ended', () => {
-            alert('ended');
+            console.log('ended');
         });
         video.addEventListener('error', (err) => {
-            alert(err);
+            console.error(err);
         });
         video.addEventListener('abord', (event: Event) => console.log('abord', event));
         // video.addEventListener('canplay', (event: Event) => console.log('canplay', event));

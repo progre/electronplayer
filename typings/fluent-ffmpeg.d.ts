@@ -9,6 +9,8 @@ interface FfmpegCommand {
     on(event: 'error', callback: (err: Error, stdout: string, stderr: string) => void): FfmpegCommand;
     on(event: string, callback: Function): FfmpegCommand;
     save(target: string, options?: any): FfmpegCommand;
+    format(format: string): FfmpegCommand;
+    pipe(target: any, options?: any): FfmpegCommand;
     kill(): void;
 }
 
