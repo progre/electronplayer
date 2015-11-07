@@ -4,7 +4,7 @@
   "description": "Media player for sphere live stream",
   "main": "lib/index.js",
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp release-build-and-test"
   },
   "repository": {
     "type": "git",
