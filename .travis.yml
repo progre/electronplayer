@@ -3,6 +3,7 @@ node_js: 4.1
 env:
   APP_NAME=sphereplayer
 before_script:
+  - npm i -g npm
   - npm install gulp
 before_deploy:
   - ./pack.sh
