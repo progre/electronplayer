@@ -8,14 +8,18 @@ require('./gulp/jade')();
 require('./gulp/stylus')();
 require('./gulp/test')();
 require('./gulp/ts')({
-    browserify: [
-        {
-            src: 'src/public/script/main.ts',
-            dest: 'lib/public/script/'
-        }, {
-            src: 'src/public/script/dfadjust.ts',
-            dest: 'lib/public/script/'
-        }]
+    browserify: {
+        files: [
+            {
+                src: 'src/public/js/main.ts',
+                dest: 'lib/public/js/'
+            }, {
+                src: 'src/public/js/dfadjust.ts',
+                dest: 'lib/public/js/'
+            }
+        ],
+        configPath: 'src/tsconfig.json'
+    }
 });
 
 gulp.task('default', ['build', 'watch']);

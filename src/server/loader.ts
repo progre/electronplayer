@@ -36,7 +36,7 @@ export default class Loader {
                 .format('matroska')
                 .on('error', reject) // killした時もerrorになるらしい
                 .on('end', resolve)
-                .pipe(writable, {end:true});
+                .pipe(writable, { end: true });
         }).then(() => {
             this.runningCommand = null;
         }).catch(err => {

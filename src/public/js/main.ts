@@ -63,10 +63,6 @@ export default class Main {
             .then(() => {
                 this.glRenderer.start(video, models);
             });
-        // loadImage('dualfisheye.png')
-        //     .then(image => {
-        //         this.glRenderer.start(<any>image, models);
-        //     });
     }
 
     private openDualFisheyeAdjustment() {
@@ -101,17 +97,6 @@ function options() {
         .map(x => x.split('='))
         .forEach(x => map.set(x[0], x[1]));
     return map;
-}
-
-function loadImage(src: string) {
-    return new Promise<HTMLImageElement>((resolve, reject) => {
-        let image = new Image();
-        image.onload = function() {
-            resolve(image);
-        };
-        image.src = src;
-        console.log(src);
-    });
 }
 
 function loadVideo(video: HTMLVideoElement, src: string) {

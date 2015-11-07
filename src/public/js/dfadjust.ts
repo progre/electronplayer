@@ -57,6 +57,8 @@ $('ready', () => {
                 $('#directionUp').removeClass('active');
                 $('#directionRight').addClass('active');
                 break;
+            default:
+                throw new Error('Unsupported direction: ' + params.direction);
         }
         $('#directionLeft').change(function() {
             params.direction = 'left';
@@ -79,7 +81,11 @@ function modelParams() {
 }
 
 function updateModelParams(params: any) {
-    console.log(params.dualFisheye.size + ', ' + params.dualFisheye.y + ', ' + params.dualFisheye.left + ', ' + params.dualFisheye.right + ', ' + params.direction);
+    console.log(params.dualFisheye.size + ', '
+        + params.dualFisheye.y + ', '
+        + params.dualFisheye.left + ', '
+        + params.dualFisheye.right + ', '
+        + params.direction);
     window.opener.postMessage(JSON.stringify({ method: 'updateModelParams', arg: params }), '*');
 }
 

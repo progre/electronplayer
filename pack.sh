@@ -8,11 +8,11 @@ cd dest
 npm install --production
 cd ..
 electron-packager dest/ $APP_NAME --platform=win32 --arch=ia32 --version=0.34.3
-zip -qry $APP_NAME-win32-ia32.zip $APP_NAME-win32-ia32
+zip -qry $APP_NAME-win32-ia32.zip $APP_NAME-win32-ia32 -x '*.osx'
 rm -rf $APP_NAME-win32-ia32
 electron-packager dest/ $APP_NAME --platform=win32 --arch=x64 --version=0.34.3
-zip -qry $APP_NAME-win32-x64.zip $APP_NAME-win32-x64
+zip -qry $APP_NAME-win32-x64.zip $APP_NAME-win32-x64 -x '*.osx'
 rm -rf $APP_NAME-win32-x64
 electron-packager dest/ $APP_NAME --platform=darwin --arch=x64 --version=0.34.3
-zip -qry $APP_NAME-darwin-x64.zip $APP_NAME-darwin-x64
+zip -qry $APP_NAME-darwin-x64.zip $APP_NAME-darwin-x64 -x '*.exe'
 rm -rf $APP_NAME-darwin-x64

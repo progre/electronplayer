@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import * as http from 'http';
-import * as fs from 'fs';
-import * as stream from 'stream';
 let bluebird = require('bluebird');
 let testTcp = require('test-tcp');
-import {v4 as uuid} from 'node-uuid';
 import Loader from './loader';
 let emptyPort: () => Promise<number> = bluebird.promisify(testTcp.empty_port);
 

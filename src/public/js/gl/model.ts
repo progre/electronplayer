@@ -114,7 +114,14 @@ function pushEquirectangular(texCoord1Data: number[], texCoord2Data: number[], l
     texCoord2Data.push(latitude);
 }
 
-function pushDualFisheye(texCoord1Data: number[], texCoord2Data: number[], params: ModelParams, ratioOfHeight: number, longitude: number, latitude: number) {
+function pushDualFisheye(
+    texCoord1Data: number[],
+    texCoord2Data: number[],
+    params: ModelParams,
+    ratioOfHeight: number,
+    longitude: number,
+    latitude: number
+) {
     let rect = {
         left: {
             left: params.dualFisheye.left - params.dualFisheye.size / 2
