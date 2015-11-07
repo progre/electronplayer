@@ -101,5 +101,5 @@ function getUrl(arg: string) {
         return Promise.resolve(arg.replace('/pls/', '/stream/'));
     }
     return promisify(fs.readFile)(arg, 'ascii')
-        .then(data => data.split('\r')[0]);
+        .then(data => data.split('\r')[0].split('\n')[0]);
 }
