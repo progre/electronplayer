@@ -19,8 +19,8 @@ try { require('source-map-support').install(); } catch (e) { /* empty */ }
 require('crash-reporter').start();
 import * as fs from 'fs';
 import * as log4js from 'log4js';
-const promisify: (func: Function) => (...args: any[]) => Promise<any> = require('bluebird').promisify;
 const logger = log4js.getLogger();
+const promisify: (func: Function) => (...args: any[]) => Promise<any> = require('bluebird').promisify;
 import * as app from 'app';
 import * as BrowserWindow from 'browser-window';
 import Loader from './server/loader';
@@ -52,6 +52,9 @@ Promise.resolve()
         mainWindow.setMenu(createAppMenu(mainWindow.webContents));
         mainWindow.loadUrl(
             `file://${__dirname}/public/index.html?port=${port}&url=${encodeURIComponent(url) }`);
+        mainWindow.on('closed', () => {
+            app.quit();
+        });
     })
     .catch((e) => {
         logger.fatal(e);

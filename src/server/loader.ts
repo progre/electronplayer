@@ -15,6 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import * as stream from 'stream';
 import * as FfmpegCommand from 'fluent-ffmpeg';
+import * as log4js from 'log4js';
+const logger = log4js.getLogger();
 
 export default class Loader {
     private runningCommand: FfmpegCommand;
@@ -41,7 +43,7 @@ export default class Loader {
             this.runningCommand = null;
         }).catch(err => {
             this.runningCommand = null;
-            return Promise.reject(err);
+            throw err;
         });
     }
 
@@ -49,7 +51,11 @@ export default class Loader {
         if (this.runningCommand == null) {
             return;
         }
-        this.runningCommand.kill();
+        try {
+            this.runningCommand.kill();
+        } catch (e) {
+            logger.warn(e);
+        }
         this.runningCommand = null;
     }
 }
