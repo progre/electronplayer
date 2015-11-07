@@ -1,5 +1,5 @@
 language: node_js
-node_js: 5.0.0
+node_js: 4.1
 env:
   APP_NAME=youtubeuploader
 before_script:
